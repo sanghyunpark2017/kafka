@@ -72,6 +72,11 @@ server.2=t1vbigdata2:15000:16000
 server.3=t1vbigdata3:15000:16000
 EOF
 
+##############################
+Run a zookeeper daemon
+##############################
+
+
 ### Config startup script
 
 cd /usr/local/kafka/
@@ -81,9 +86,6 @@ nohup bin/zookeeper-server-start.sh -daemon config/zookeeper.properties
 EOF
 
 chmod 755 zk-start.sh
-./zk-start.sh
-
-
 
 ### Config stop script
 
@@ -95,20 +97,37 @@ EOF
 
 chmod 755 zk-stop.sh
 
+###########################
+Disabled&Stop FirewallD
+###########################
 
-zk-stop.sh
+systemctl disable firewalld
+systemctl stop firewalld
 
 
-##############################
-Running zookeeper
-##############################
+##### running on foreground
 
+cd /usr/local/kafka/
+bin/zookeeper-server-start.sh config/zookeeper.properties
+
+
+##### running on background
 
 cd /usr/local/kafka/
 ./zk-start.sh
 
+
 cd /usr/local/kafka/
 ./zk-stop.sh
+
+
+
+
+
+
+
+
+
 
 
 
