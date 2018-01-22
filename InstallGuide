@@ -10,16 +10,9 @@ cat << EOF >> /etc/hosts
 10.10.64.75 t1vbigdata3 
 EOF
 
-yum install -y wget
-
 #################################
 JAVA설치
 #################################
-
-
-Install Java
-마스터서버 1대, 모드 5대 동시 진행
-
 
 yum install -y wget
 cd /opt/
