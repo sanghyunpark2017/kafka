@@ -79,22 +79,20 @@ Run a zookeeper daemon
 
 ### Config startup script
 
-cd /usr/local/kafka/
-cat << EOF >> zk-start.sh
+cat << EOF > /usr/local/kafka/zk-start.sh
 #!/bin/bash
 nohup bin/zookeeper-server-start.sh -daemon config/zookeeper.properties 
 EOF
 
-chmod 755 zk-start.sh
-
 ### Config stop script
 
-cat << EOF >> zk-stop.sh
+cat << EOF > /usr/local/kafka/zk-stop.sh
 #!/bin/bash
 KAFKA_HOME=/usr/local/kafka
 $KAFKA_HOME/bin/zookeeper-server-stop.sh
 EOF
 
+chmod 755 zk-start.sh
 chmod 755 zk-stop.sh
 
 ###########################
@@ -110,12 +108,9 @@ systemctl stop firewalld
 cd /usr/local/kafka/
 bin/zookeeper-server-start.sh config/zookeeper.properties
 
-
 ##### running on background
-
 cd /usr/local/kafka/
 ./zk-start.sh
-
 
 cd /usr/local/kafka/
 ./zk-stop.sh
