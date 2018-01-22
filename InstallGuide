@@ -70,9 +70,7 @@ server.2=t1vbigdata2:15000:16000
 server.3=t1vbigdata3:15000:16000
 EOF
 
-
-
-### startup script
+### Config startup script
 
 cd /usr/local/kafka/
 cat << EOF >> zk-start.sh
@@ -85,7 +83,7 @@ chmod 755 zk-start.sh
 
 
 
-### stop script
+### Config stop script
 
 cat << EOF >> zk-stop.sh
 #!/bin/bash
@@ -99,8 +97,16 @@ chmod 755 zk-stop.sh
 zk-stop.sh
 
 
+##############################
+Running zookeeper
+##############################
 
 
+cd /usr/local/kafka/
+./zk-start.sh
+
+cd /usr/local/kafka/
+./zk-stop.sh
 
 
 
