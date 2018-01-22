@@ -45,8 +45,6 @@ export PATH=$PATH:/opt/jdk1.8.0_131/bin:/opt/jdk1.8.0_131/jre/bin
 EOF
 
 
-
-
 ##############################
 download kafka (2018/01/21)
 ##############################
@@ -72,6 +70,21 @@ server.2=t1vbigdata2:15000:16000
 server.3=t1vbigdata3:15000:16000
 EOF
 
+#### HOST-A
+mkdir -p /tmp/zookeeper
+echo 1 << EOF > /tmp/zookeeper/myid
+EOF
+
+#### HOST-B
+mkdir -p /tmp/zookeeper
+echo 2 << EOF > /tmp/zookeeper/myid
+EOF
+
+#### HOST-C
+mkdir -p /tmp/zookeeper
+echo 3 << EOF > /tmp/zookeeper/myid
+EOF
+
 ##############################
 Run a zookeeper daemon
 ##############################
@@ -88,12 +101,12 @@ EOF
 
 cat << EOF > /usr/local/kafka/zk-stop.sh
 #!/bin/bash
-KAFKA_HOME=/usr/local/kafka
-$KAFKA_HOME/bin/zookeeper-server-stop.sh
+/usr/local/kafka/bin/zookeeper-server-stop.sh
 EOF
 
-chmod 755 zk-start.sh
-chmod 755 zk-stop.sh
+chmod 755 /usr/local/kafka/zk-start.sh
+chmod 755 /usr/local/kafka/zk-stop.sh
+
 
 ###########################
 Disabled&Stop FirewallD
@@ -109,11 +122,64 @@ cd /usr/local/kafka/
 bin/zookeeper-server-start.sh config/zookeeper.properties
 
 ##### running on background
-cd /usr/local/kafka/
-./zk-start.sh
+/usr/local/kafka/zk-start.sh
 
-cd /usr/local/kafka/
-./zk-stop.sh
+/usr/local/kafka/zk-stop.sh
+
+
+###########################
+Setup kafka cluster
+###########################
+
+cd /usr/local/kafka/config
+bk server.properties
+
+vi /usr/local/kafka/config/server.properties
+--------------------------------------------------------------------------------
+1) broker.id를 주키퍼의 id와 동일하게 설정한다
+
+2) 주키퍼연결 수정
+zookeeper.connect=localhost:2181
+—> 
+zookeeper.connect=t1vbigdata1:2181,t1vbigdata2:2181,t1vbigdata3:2181
+--------------------------------------------------------------------------------
+
+cd /usr/local/kafka
+
+cat << EOF > /usr/local/kafka/kafka-start.sh
+#!/bin/bash
+/usr/local/kafka/bin/kafka-server-start.sh -daemon /usr/local/kafka/config/server.properties
+EOF
+
+cat << EOF > /usr/local/kafka/kafka-stop.sh
+#!/bin/bash
+/usr/local/kafka/bin/kafka-server-stop.sh -daemon /usr/local/kafka/config/server.properties
+EOF
+
+chmod 755 /usr/local/kafka/kafka-start.sh
+chmod 755 /usr/local/kafka/kafka-stop.sh
+
+
+/usr/local/kafka/kafka-start.sh
+
+tail -f /usr/local/kafka/logs/kafkaServer.out
+
+
+##############################
+# check the kafka
+##############################
+각 서버에 카프카 id별로 stared 되어있으면 정상이므로, 주키퍼->카프카 순서대로 종료함
+kafkaServer id=1] started (kafka.server.KafKaServer)
+kafkaServer id=2] started (kafka.server.KafKaServer)
+kafkaServer id=3] started (kafka.server.KafKaServer)
+
+##주키퍼실행/종료
+/usr/local/kafka/zk-start.sh
+/usr/local/kafka/zk-stop.sh
+
+##카프카실행/종료
+/usr/local/kafka/kafka-start.sh
+/usr/local/kafka/kafka-stop.sh
 
 
 
