@@ -175,18 +175,98 @@ kafkaServer id=3] started (kafka.server.KafKaServer)
 
 ##주키퍼실행/종료
 /usr/local/kafka/zk-start.sh
+tail -f /usr/local/kafka/logs/zookeeper.out
+
 /usr/local/kafka/zk-stop.sh
+tail -f /usr/local/kafka/logs/zookeeper.out
 
 ##카프카실행/종료
 /usr/local/kafka/kafka-start.sh
+tail -f /usr/local/kafka/logs/kafkaServer.out
+
 /usr/local/kafka/kafka-stop.sh
+tail -f /usr/local/kafka/logs/kafkaServer.out
+
+
+##############################
+# Create a topic and browsing
+##############################
+
+/usr/local/kafka/bin/kafka-topics.sh --create --zookeeper t1vbigdata1 --replication-factor 3 --partitions 1 --topic test
+>>Created topic "test"
+
+/usr/local/kafka/bin/kafka-topics.sh --list --zookeeper t1vbigdata1
+>>test
+
+/usr/local/kafka/bin/kafka-topics.sh --alter --zookeeper t1vbigdata1 --topic test --partitions 2
+>>WARNING: If partitions are increased for a topic that has a key, the partition logic or ordering of the messages will be affected
+>>Adding partitions succeeded!
+
+/usr/local/kafka/bin/kafka-topics.sh --describe --zookeeper t1vbigdata1 --topic test
+
+##############################
+# Producer/Consumer
+##############################
+2개의 터미널
+
+#Producer
+/usr/local/kafka/bin/kafka-console-producer.sh --broker-list t1vbigdata1:9092 --topic test
+
+#Consumer
+/usr/local/kafka/bin/kafka-console-consumer.sh --zookeeper t1vbigdata1 --topic test --from-beginning
+
+/usr/local/kafka/bin/kafka-console-consumer.sh --bootstrap-server t1vbigdata1:9092 --topic test --from-beginning
+
+
+디폴트로 토픽을 삭제 할 수 없음
+/usr/local/kafka/bin/kafka-topics.sh --delete --zookeeper t1vbigdata1 --topic test
+>>Topic test is marked for deletion.
+>>Note: This will have no impact if delete.topic.enable is not set to true.
+
+설정파일에 삭제 enable 후 kafka 재기동하여 반영
+
+cat << EOF >> /usr/local/kafka/config/server.properties
+delete.topic.enable=true
+EOF
+
+
+/usr/local/kafka/kafka-stop.sh
+tail -f /usr/local/kafka/logs/kafkaServer.out
+
+/usr/local/kafka/kafka-start.sh
+tail -f /usr/local/kafka/logs/kafkaServer.out
 
 
 
+##############################
+# 테스트
+##############################
 
+#토픽리스트
+/usr/local/kafka/bin/kafka-topics.sh --list --zookeeper t1vbigdata1
 
+#토픽생성 후 확인(describe)
+/usr/local/kafka/bin/kafka-topics.sh --create --zookeeper t1vbigdata1 --replication-factor 3 --partitions 1 --topic test
+/usr/local/kafka/bin/kafka-topics.sh --describe --zookeeper t1vbigdata1 --topic test
 
+#토픽수정(파티션1개->2개) 후 확인(describe)
+/usr/local/kafka/bin/kafka-topics.sh --alter --zookeeper t1vbigdata1 --topic test --partitions 2
+/usr/local/kafka/bin/kafka-topics.sh --describe --zookeeper t1vbigdata1 --topic test
 
+#토픽리스트
+/usr/local/kafka/bin/kafka-topics.sh --list --zookeeper t1vbigdata1
+
+#프로듀서
+/usr/local/kafka/bin/kafka-console-producer.sh --broker-list t1vbigdata1:9092 --topic test
+
+#컨슈머
+/usr/local/kafka/bin/kafka-console-consumer.sh --bootstrap-server t1vbigdata1:9092 --topic test --from-beginning
+
+#토픽삭제
+/usr/local/kafka/bin/kafka-topics.sh --delete --zookeeper t1vbigdata1 --topic test
+
+#토픽리스트
+/usr/local/kafka/bin/kafka-topics.sh --list --zookeeper t1vbigdata1
 
 
 
