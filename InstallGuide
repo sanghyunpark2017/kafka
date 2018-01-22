@@ -4,12 +4,13 @@ pre-requirement
 ##############################
 
 #server 3ea
-
-
+cat << EOF >> /etc/hosts
+10.10.64.73 t1vbigdata1 
+10.10.64.74 t1vbigdata2 
+10.10.64.75 t1vbigdata3 
+EOF
 
 yum install -y wget
-
-
 
 
 ##############################
@@ -20,6 +21,51 @@ wget http://apache.mirror.cdnetworks.com/kafka/1.0.0/kafka_2.11-1.0.0.tgz
 tar zxvf kafka_2.11-1.0.0.tgz
 cp -r kafka_2.11-1.0.0 /usr/local
 ln -s  kafka_2.11-1.0.0  /usr/local/kafka
+
+##############################
+Install zookeeper
+##############################
+
+cd /usr/local/kafka/config
+bk zookeeper.properties
+
+cat << EOF >> zookeeper.properties
+initLimit=5
+syncLimit=2
+
+server.1=t1vbigdata1:15000:16000
+server.2=t1vbigdata2:15000:16000
+server.3=t1vbigdata3:15000:16000
+EOF
+
+
+
+### startup script
+
+cd /usr/local/kafka/
+cat << EOF >> zk-start.sh
+#!/bin/bash
+nohup bin/zookeeper-server-start.sh -daemon config/zookeeper.properties 
+EOF
+
+chmod 755 zk-start.sh
+./zk-start.sh
+
+
+
+### stop script
+
+cat << EOF >> zk-stop.sh
+#!/bin/bash
+KAFKA_HOME=/usr/local/kafka
+$KAFKA_HOME/bin/zookeeper-server-stop.sh
+EOF
+
+chmod 755 zk-stop.sh
+
+
+zk-stop.sh
+
 
 
 
