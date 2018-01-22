@@ -1,0 +1,32 @@
+
+##############################
+pre-requirement
+##############################
+
+#server 3ea
+
+
+
+yum install -y wget
+
+
+
+
+##############################
+download kafka (2018/01/21)
+##############################
+
+wget http://apache.mirror.cdnetworks.com/kafka/1.0.0/kafka_2.11-1.0.0.tgz 
+tar zxvf kafka_2.11-1.0.0.tgz
+cp -r kafka_2.11-1.0.0 /usr/local
+ln -s  kafka_2.11-1.0.0  /usr/local/kafka
+
+
+
+
+
+
+
+
+
+
